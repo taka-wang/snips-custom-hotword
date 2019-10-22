@@ -9,7 +9,15 @@ import paho.mqtt.publish as publish
 import pytoml
 import signal
 import snowboydecoder
+import logging
 import sys
+import os
+
+# setup logger
+logging.basicConfig(stream=sys.stderr, format='%(levelname)7s: %(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 
 SNIPS_CONFIG_PATH = '/etc/snips.toml'
 
@@ -17,8 +25,8 @@ interrupted = False
 siteId = 'default'
 mqttServer = '127.0.0.1'
 mqttPort = 1883
-model = ''
-sensitivity = 0.4
+model = 'jarvis'
+sensitivity = "0.8,0.80"
 hotwordId = 'default'
 
 def loadConfigs():
@@ -42,7 +50,7 @@ def loadConfigs():
 			if 'hotword_id' in configs['snips-hotword']:
 				hotwordId = configs['snips-hotword']['hotword_id']
 	else:
-		print('Snips configs not found')
+		logger.warning('Snips configs not found')
 
 def signal_handler(signal, frame):
 	global interrupted
@@ -59,23 +67,8 @@ def onHotword():
 signal.signal(signal.SIGINT, signal_handler)
 
 if __name__ == '__main__':
-	try:
-		model = sys.argv[1]
-		sensitivity = float(sys.argv[2])
-	except IndexError:
-		print('Please provide model name and sensitivity as argument')
-		sys.exit()
-
-	if not os.path.isfile('{}.pmdl'.format(model)):
-		print('The specified model doesn\'t exist')
-		sys.exit()
-
-	if sensitivity < 0 or sensitivity > 1:
-		print('Sensitivity should by a float between 0 and 1')
-		sys.exit()
-
 	loadConfigs()
-	detector = snowboydecoder.HotwordDetector('{}.pmdl'.format(model), sensitivity=sensitivity)
-	print('Listening...')
+	detector = snowboydecoder.HotwordDetector('{}.umdl'.format(model), sensitivity=sensitivity)
+	logger.info('Listening...')
 	detector.start(detected_callback=onHotword, interrupt_check=interrupt_callback, sleep_time=0.03)
 	detector.terminate()

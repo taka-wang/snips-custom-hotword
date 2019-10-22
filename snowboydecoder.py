@@ -71,7 +71,7 @@ class HotwordDetector(object):
     """
     def __init__(self, decoder_model,
                  resource=RESOURCE_FILE,
-                 sensitivity=[],
+                 sensitivity_str="",
                  audio_gain=1):
 
         def audio_callback(in_data, frame_count, time_info, status):
@@ -80,29 +80,16 @@ class HotwordDetector(object):
             return play_data, pyaudio.paContinue
 
         tm = type(decoder_model)
-        ts = type(sensitivity)
         if tm is not list:
             decoder_model = [decoder_model]
-        if ts is not list:
-            sensitivity = [sensitivity]
         model_str = ",".join(decoder_model)
 
         self.detector = snowboydetect.SnowboyDetect(
             resource_filename=resource.encode(), model_str=model_str.encode())
         self.detector.SetAudioGain(audio_gain)
-        #this code is used when test universal model
-        #self.detector.ApplyFrontend(True)
+        self.detector.ApplyFrontend(True)
         self.num_hotwords = self.detector.NumHotwords()
-
-        if len(decoder_model) > 1 and len(sensitivity) == 1:
-            sensitivity = sensitivity*self.num_hotwords
-        if len(sensitivity) != 0:
-            assert self.num_hotwords == len(sensitivity), \
-                "number of hotwords in decoder_model (%d) and sensitivity " \
-                "(%d) does not match" % (self.num_hotwords, len(sensitivity))
-        sensitivity_str = ",".join([str(t) for t in sensitivity])
-        if len(sensitivity) != 0:
-            self.detector.SetSensitivity(sensitivity_str.encode())
+        self.detector.SetSensitivity(sensitivity_str.encode())
 
         self.ring_buffer = RingBuffer(
             self.detector.NumChannels() * self.detector.SampleRate() * 5)
