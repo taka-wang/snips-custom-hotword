@@ -68,7 +68,7 @@ signal.signal(signal.SIGINT, signal_handler)
 
 if __name__ == '__main__':
 	loadConfigs()
-	detector = snowboydecoder.HotwordDetector('{}.umdl'.format(model), sensitivity=sensitivity)
+	detector = snowboydecoder.HotwordDetector('{}.umdl'.format(model), sensitivity_str=sensitivity)
 	logger.info('Listening...')
 	detector.start(detected_callback=onHotword, interrupt_check=interrupt_callback, sleep_time=0.03)
 	detector.terminate()

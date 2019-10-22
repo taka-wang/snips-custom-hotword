@@ -63,7 +63,7 @@ class HotwordDetector(object):
 
     :param decoder_model: decoder model file path, a string or a list of strings
     :param resource: resource file path.
-    :param sensitivity: decoder sensitivity, a float of a list of floats.
+    :param sensitivity_str: decoder sensitivity, a float of a list of floats.
                               The bigger the value, the more senstive the
                               decoder. If an empty list is provided, then the
                               default sensitivity in the model will be used.
@@ -71,7 +71,7 @@ class HotwordDetector(object):
     """
     def __init__(self, decoder_model,
                  resource=RESOURCE_FILE,
-                 sensitivity_str="",
+                 sensitivity_str="0.8,0.80",
                  audio_gain=1):
 
         def audio_callback(in_data, frame_count, time_info, status):
